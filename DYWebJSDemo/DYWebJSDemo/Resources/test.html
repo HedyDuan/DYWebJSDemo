@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="format-detection" content="telephone=no" />
+        <title>分享页</title>
+    </head>
+    <body>
+<!--      可以放开注释，测试img包含在a标签中时，是否还会添加onclick事件          -->
+<!--        <a>-->
+         <h2 style="text-align:center">Hello World!</h2>
+        <img style="max-width:100%;" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566040289079&di=21d2ba5cbfe3115ccf25bf456e85d5f6&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F12%2F20150912020030_zKQkN.jpeg">
+        <p style="text-align:center"> <img src="https://upload.jianshu.io/users/upload_avatars/1708447/fe2c67e7-25f7-4e2e-a321-a5d517c124aa.jpeg?imageMogr2/auto-orient/strip|imageView2/1/w/240/h/240"  id= "pictureId" width="128" height="128" align="middle" onclick="clickImage();" /> </p>
+        <p style="text-align:center"> <a href="https://juejin.im/user/59e5b5726fb9a045263aa7d7">掘金主页</a> </p>
+        <!--        音频-->
+        
+<!--        </a>-->
+        <div>
+            <a href="mobileCode://smsLogin?username=13678946758&code=122786">使用短信验证码登录</a>
+        </div>
+        </div>
+            <a href="javascript:void(0);" class="sharebtn" onclick="share('领取话费','分享链接给你的微信号又或者qq好友，即可领取1元话费' 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566203866173&di=7a3035ce1c25fb6f1003ca2eeca7f2cd&imgtype=0&src=http%3A%2F%2Fimg1.juimg.com%2F180405%2F355858-1P40511025273.jpg', location.href)">分享领话费</a>
+        </div>
+        
+        <p style="text-align:center"> <audio controls="controls" height="100" width="100">
+            <source src="http://up.mcyt.net/?down/47548.mp3" type="audio/mp3" />
+            <source src="http://up.mcyt.net/?down/47548.ogg" type="audio/ogg" />
+            <embed height="100" width="100" src="http://up.mcyt.net/?down/47548.mp3" />
+        </audio> </p>
+        
+        <div onclick="alert(testAddMethod(1,5))">点击测试两数相加</div>
+        <a href="javascript:void(0);" onclick="test()">测试新分享</a></br>
+        <h>下面展示分享结果：</p><div id="shareResult"></div>
+        <div>
+            <a href="javascript:void(0);" onclick="chooseContact()">选择联系人</a>
+            <div id="contactInfo"></div>
+        </div>
+        <script>
+            //一个分享功能
+            function share (title, content, imageUrl, url) {
+                //使用WKWebView测试
+                window.webkit.messageHandlers.share.postMessage({title: title, content: content, imageUrl: imageUrl, url: url});
+                //OC实现代码
+            }
+        
+            //该方法传入两个整数，求和，并返回结果
+            function testAddMethod (a, b) {
+                //需要OC实现a+b，并返回
+                return a + b;
+            }
+        //图片点击事件
+        function clickImage()
+        {
+            alert("点击了图片");
+        }
+            /**
+             * 分享方法，并且会异步回调分享结果
+             * @param  {对象类型} shareData 一个分享数据的对象，包含title,imgUrl,link以及一个回调function
+             * @return {void}	 无同步返回值
+             */
+            function shareNew(shareData) {
+                
+                var title = shareData.title;
+                var content = shareData.content;
+                var imageUrl = shareData.imageUrl;
+                var url = shareData.url;
+                var result = shareData.result;
+                //do something
+                //这里模拟异步操作
+                setTimeout(function(){
+                   //2s之后，回调true分享成功
+                   result(true);
+                }, 2000);
+                
+                
+                //用于WKWebView，因为WKWebView并没有办法把js function传递过去，因此需要特殊处理一下
+                //把js function转换为字符串，oc端调用时 (<js function string>)(true); 即可
+                shareData.result = result.toString();
+                window.webkit.messageHandlers.shareNew.postMessage(shareData);
+            }
+        
+            function test() {
+                //清空分享结果
+                shareResult.innerHTML = "";
+                
+                //调用时，应该
+                shareNew({
+                         title: "title",
+                         content: "",
+                         imageUrl: "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566194451690&di=26d8020e9fa58402d0ed158464e6c191&imgtype=0&src=http%3A%2F%2Fhbimg.b0.upaiyun.com%2Ffc1d7fdcc6509727eebd8f5fb696a5f1313748371a3e5-32iRpx_fw658",
+                         url: location.href,
+                         result: function(res) {
+                           //这里shareResult 等同于 document.getElementById("shareResult")
+                           shareResult.innerHTML = res ? "success" : "failure";
+                         }
+                });
+            }
+        
+        function chooseContact() {
+            DANativeApi.choosePhoneContact({
+                                           completion: function(res) {
+                                           contactInfo.innerHTML = JSON.stringify(res);
+                                           }
+                                           });
+        }
+        
+        </script>
+    </body>
+</html>
